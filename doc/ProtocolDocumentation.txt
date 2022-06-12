@@ -1,0 +1,152 @@
+EPITECH MyTeams Protocol
+
+The following are the MYTEAMS commands from client to server:
+
+            /login <;> <user_name> <CRLF>                                   : set the user_name used by client
+            /logout <CRLF>                                                  : disconnect the client from the server
+
+            /users <CRLF>                                                   : get the list of all users that exist on the domain
+            /user <;> <user_uuid> <CRLF>                                    : get information about a user
+
+            /send <;> <user_uuid> <;> <message_body> <CRLF>                 : send a message to a user
+            /messages <;> <user_uuid> <CRLF>                                : list all messages exchange with an user
+
+            /subscribe <;> <team_uuid> <CRLF>                               : subscribe to the event of a team and its sub directories (enable reception of all events from a team)
+            /subscribed <;> ?<team_uuid> <CRLF>                             : list all subscribeds teams or list all users subscribed to a team
+            /unsubscribe <;> <team_uuid> <CRLF>                             : unsubscribe from a team
+
+            /create <;> <team_name> <;> <team_description> <CRLF>           : create a new team when the context is not defined (USE)
+            /create <;> <channel_name> <;> <channel_description> <CRLF>     : create a new channel when team_uuid is defined (USE team_uuid)
+            /create <;> <thread_title> <;> <thread_body> <CRLF>             : create a new thread when team_uuid and channel_uuid is defined (USE team_uuid channel_uuid)
+            /create <;> <comment_body> <CRLF>                               : create a new reply when team_uuid, channel_uuid and thread_uuid is defined (USE team_uuid channel_uuid thread_uuid)
+
+            /list <CRLF>                                                    : list all existing teams when the context is not defined (USE)
+            /list <CRLF>                                                    : list all existing channels when team_uuid is defined (USE team_uuid)
+            /list <CRLF>                                                    : list all existing threads when team_uuid and channel_uuid is defined (USE team_uuid channel_uuid)
+            /list <CRLF>                                                    : list all existing replies when team_uuid, channel_uuid and thread_uuid is defined (USE team_uuid channel_uuid thread_uuid)
+
+            /info <CRLF>                                                    : display currently logged user infos when the context is not defined (USE)
+            /info <CRLF>                                                    : display currently selected team infos when team_uuid is defined (USE team_uuid)
+            /info <CRLF>                                                    : display currently selected channel infos when team_uuid and channel_uuid is defined (USE team_uuid channel_uuid)
+            /info <CRLF>                                                    : display currently selected thread infos when team_uuid, channel_uuid and thread_uuid is defined (USE team_uuid channel_uuid thread_uuid)
+
+Command-Reply Sequences
+
+The server reply is defined to contain the command reference, followed by Space <;>, followed by one line of text, and terminated by the Telnet end-of-line code <CRLF>.
+
+Example :
+
+-> /login <;> <user_name> <CRLF>
+<- /login <;> <user_uuid> <;> <user_name> <CRLF>
+-> /logout <CRLF>
+<- /logout <CRLF>
+
+-> : Request command from client to server
+<- : Reply from server to client
+
+            /login ->
+                <- /login <;> <user_uuid> <;> <user_name> <CRLF>
+
+            /logout ->
+                <- /logout <CRLF>
+
+            /users ->
+                <- /users [<;> <user_uuid> <;> <user_name> <;> <user_status>] <CRLF>
+
+            /user ->
+                <- /user <;> <user_uuid> <;> <user_name> <;> <user_status> <CRLF>
+                <- /error_user_not_found <;> <user_uuid> <CRLF>
+
+            /send ->
+                <- /send <;> <user_uuid> <;> <message_body> <CRLF>
+                <- /error <;> <user_uuid> <CRLF>
+
+            /messages ->
+                <- /messages [<;> <sender_uuid> <;> <message_timestamp> <;> <message_body>] <CRLF>
+                <- /error <;> <user_uuiD> <CRLF>
+
+            /subscribe ->
+                <- /subscribe <;> <user_uuid> <;> <team_uuid> <CRLF>
+                <- /error <;> <team_uuid> <CRLF>
+
+            /subscribed ->
+                <- /subscribed [<;> <team_uuid> <;> <team_name> <;> <team_description>] <CRLF>
+                <- /error <;> <team_uuid> <CRLF>
+
+            /subscribed "team_uuid" ->
+                <- /subscribed_team [<;> <user_uuid> <;> <user_name> <;> <user_status>] <CRLF>
+                <- /error <;> <team_uuid> <CRLF>
+
+            /unsubscribe ->
+                <- /unsubscribe <;> <user_uuid> <;> <team_uuid> <CRLF>
+                <- /error <;> <team_uuid> <CRLF>
+
+            /create "reply_body" ->
+                <- /create_reply <;> <thread_uuid> <;> <user_uuid> <;> <reply_timestamp> <;> <reply_body> <CRLF>
+                <- /error_unknown_team <;> <team_uuid> <CRLF>
+                <- /error_unknown_channel <;> <channel_uuid> <CRLF>
+                <- /error_unknown_thread <;> <thread_uuid> <CRLF>
+
+            /create "team_name" "team_description" ->
+                <- /create_team <;> <team_uuid> <;> <team_name> <;> <team_description> <CRLF>
+                <- /error_already_exist <CRLF>
+
+            /create "channel_name" "channel_description" ->
+                <- /create_channel <;> <channel_uuid> <;> <channel_name> <;> <channel_description> <CRLF>
+                <- /error_unknown_team <;> <team_uuid> <CRLF>
+                <- /error_already_exist <CRLF>
+
+            /create "thread_title" "thread_body" ->
+                <- /create_thread <;> <thread_uuid> <;> <user_uuid> <;> <thread_timestamp> <;> <thread_title> <;> <thread_body> <CRLF>
+                <- /error_unknown_team <;> <team_uuid> <CRLF>
+                <- /error_unknown_channel <;> <channel_uuid> <CRLF>
+                <- /error_already_exist <CRLF>
+
+            /list ->
+                <- /list_team [<;> <team_uuid> <;> <team_name> <;> <team_description>] <CRLF>
+                <- /error_unknown_team <;> <team_uuid> <CRLF>
+
+            /list ->
+                <- /list_channel [<;> <channel_uuid> <;> <channel_name> <;> <channel_description>] <CRLF>
+                <- /error_unknown_channel <;> <channel_uuid> <CRLF>
+
+            /list ->
+                <- /list_thread [<;> <thread_uuid> <;> <user_uuid> <;> <thread_timestamp> <;> <thread_title> <;> <thread_body>] <CRLF>
+                <- /error_unknown_thread <;> <thread_uuid> <CRLF>
+
+            /list ->
+                <- /list_thread_replies [<;> <tread_uuid> <;> <user_uuid> <;> <reply_timestamp> <;> <reply_body>] <CRLF>
+                <- /error_unknown_thread <;> <thread_uuid> <CRLF>
+
+            /info ->
+                <- /info_user <;> <user_uuid> <;> <user_name> <;> <user_status> <CRLF>
+                <- /error_unknown_user <;> <user_uuid> <CRLF>
+
+            /info ->
+                <- /info_team <;> <team_uuid> <;> <team_name> <;> <team_description> <CRLF>
+                <- /error_unknown_team <;> <team_uuid> <CRLF>
+
+            /info ->
+                <- /info_channel <;> <channel_uuid> <;> <channel_name> <;> <channel_description> <CRLF>
+                <- /error_unknown_channel <;> <channel_uuid> <CRLF>
+
+            /info ->
+                <- /info_thread <;> <thread_uuid> <;> <user_uuid> <;> <thread_timestamp> <;> <thread_title> <;> <thread_body> <CRLF>
+                <- /error_unknown_thread <;> <thread_uuid> <CRLF>
+
+Events Sequences
+
+            /send "user_uuid" "message_body"
+                <- /event_send <;> <user_uuid> <;> <message_body> <CRLF>
+
+            /create "reply_body" ->
+                <- /event_reply <;> <team_uuid> <;> <thread_uuid> <;> <user_uuid> <;> <reply_body> <CRLF>
+
+            /create "team_name" "team_description" ->
+                <- /event_team <;> <team_uuid> <;> <team_name> <;> <team_description> <CRLF>
+
+            /create "channel_name" "channel_description" ->
+                <- /event_channel <;> <channel_uuid> <;> <channel_name> <;> <channel_description> <CRLF>
+
+            /create "thread_title" "thread_body" ->
+                <- /event_thread <;> <thread_uuid> <;> <user_uuid> <;> <thread_timestamp> <;> <thread_title> <;> <thread_body> <CRLF>
